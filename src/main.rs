@@ -1,13 +1,7 @@
 /*
-    netHack_rpg by NetCreature
+    Copyright 2022 NetCreature
 
-    compile & run: cargo run --release
-
-    some notes:
-    '--release' tag compiles the code with optimizations making it faster but worst on debugger.
-    'tcod' is the bindings for 'libtcod'.
-
-
+    File Author: NetCreature
 */
 
 use tcod::colors::*;
@@ -20,8 +14,8 @@ const SCREEN_HEIGHT: i32 = 50;
 const LIMIT_FPS: i32 = 20;
 
 /*
-    This struct will encapsulate all libtcod-related values
-    This will help us pass them around to functions
+    This struct encapsulates all libtcod-related values
+    and help us pass them around functions easily
 */
 struct Tcod {
     root: Root,
