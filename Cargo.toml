@@ -1,5 +1,5 @@
 [package]
-name = "netHack_rpg"
+name = "net_hack_rpg"
 version = "0.1.0"
 edition = "2021"
 
