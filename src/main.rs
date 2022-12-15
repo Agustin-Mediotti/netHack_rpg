@@ -19,6 +19,7 @@ const LIMIT_FPS: i32 = 20;
 */
 struct Tcod {
     root: Root,
+    con: Offscreen,
 }
 
 fn main() {
@@ -28,8 +29,9 @@ fn main() {
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("netHack_rpg by NetCreature")
         .init();
+    let con = Offscreen::new(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    let mut tcod = Tcod { root };
+    let mut tcod = Tcod { root, con };
 
     tcod::system::set_fps(LIMIT_FPS);
 
@@ -40,12 +42,21 @@ fn main() {
 
     while !tcod.root.window_closed() {
         let exit = handle_keys(&mut tcod, &mut player_x, &mut player_y);
-        tcod.root.set_default_foreground(WHITE);
-        tcod.root.clear();
-        tcod.root
+        tcod.con.set_default_foreground(WHITE);
+        tcod.con.clear();
+        tcod.con
             .put_char(player_x, player_y, '@', BackgroundFlag::None);
         tcod.root.flush();
         tcod.root.wait_for_keypress(true);
+        blit(
+            &tcod.con,
+            (0, 0),
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            &mut tcod.root,
+            (0, 0),
+            1.0,
+            1.0,
+        );
         if exit {
             break;
         }
