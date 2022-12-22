@@ -138,12 +138,12 @@ fn make_map(player: &mut Object) -> Map {
                 /*  Random bool value */
                 if rand::random() {
                     // First horizontally
-                    create_v_tunnel(prev_x, new_x, prev_y, &mut map);
-                    create_h_tunnel(prev_y, new_y, new_x, &mut map)
+                    create_h_tunnel(prev_x, new_x, new_y, &mut map);
+                    create_v_tunnel(prev_y, new_y, prev_x, &mut map);
                 } else {
                     // First Vertically
                     create_v_tunnel(prev_y, new_y, prev_x, &mut map);
-                    create_v_tunnel(prev_x, new_x, new_y, &mut map);
+                    create_h_tunnel(prev_x, new_x, new_y, &mut map);
                 }
             }
 
