@@ -4,8 +4,10 @@
     File Author: NetCreature
 */
 
+use rand::thread_rng;
 use rand::Rng;
 use std::cmp;
+use tcod::colors;
 use tcod::colors::*;
 use tcod::console::*;
 use tcod::map::{FovAlgorithm, Map as FovMap};
@@ -24,6 +26,7 @@ const MAX_ROOMS: i32 = 30;
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic; // default FOV algorithm
 const FOV_LIGHT_WALLS: bool = true; // light walls or not
 const TORCH_RADIUS: i32 = 10;
+const MAX_ROOM_MONSTERS: i32 = 3;
 
 const COLOR_DARK_WALL: Color = Color { r: 0, g: 0, b: 100 };
 const COLOR_DARK_GROUND: Color = Color {
@@ -119,7 +122,7 @@ struct Game {
 
 /* Fill the map with "unblocked" tiles */
 
-fn make_map(player: &mut Object) -> Map {
+fn make_map(objects: &mut Vec<Object>) -> Map {
     let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
     // Here we use the macro vec! to create a Vec and fill it with values
 
@@ -142,13 +145,13 @@ fn make_map(player: &mut Object) -> Map {
         if !failed {
             // This means no interaction, valid room
             create_room(new_room, &mut map); // Paint it to the map's tiles
+            place_objects(new_room, objects);
 
             let (new_x, new_y) = new_room.center(); // Center coordinates of the room
 
             if rooms.is_empty() {
                 // This is the first room, where the player starts at
-                player.x = new_x;
-                player.y = new_y;
+                objects.[PLAYER].set_pos(new_x, new_y);
             } else {
                 /* All rooms after the first, connect it to the previous room with a tunnel */
 
@@ -316,6 +319,22 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     );
 }
 
+fn place_objects(room: Rect, objects: &mut Vec<Object>) {
+    let num_monster = rand::thread_rng().gen_range(0..MAX_ROOM_MONSTERS + 1);
+    for _ in 0..num_monster {
+        let x = rand::thread_rng().gen_range(room.x1 + 1..room.x2);
+        let y = rand::thread_rng().gen_range(room.y1 + 1..room.y2);
+
+        let mut monster = if rand::random::<f32>() < 0.8 {
+            /* 80% chance of get an orc */
+            Object::new(x, y, 'o', colors::DESATURATED_GREEN)
+        } else {
+            Object::new(x, y, 'T', colors::DARKER_GREEN)
+        };
+        objects.push(monster);
+    }
+}
+
 fn main() {
     tcod::system::set_fps(LIMIT_FPS);
 
@@ -336,12 +355,11 @@ fn main() {
     /* Declared game objects */
 
     let player = Object::new(0, 0, '@', WHITE);
-    let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', YELLOW);
 
-    let mut objects = [player, npc];
+    let mut objects = vec! [player];
 
     let mut game = Game {
-        map: make_map(&mut objects[0]),
+        map: make_map(&mut objects),
     };
 
     /* Populate the FOV map, according to the generated map */
