@@ -66,10 +66,21 @@ struct Object {
     y: i32,
     char: char,
     color: Color,
+    name: String,
+    blocks: bool,
+    alive: bool,
 }
 
 impl Object {
-    pub fn new(x: i32, y: i32, char: char, color: Color) -> Self {
+    pub fn new(
+        x: i32,
+        y: i32,
+        char: char,
+        color: Color,
+        name: String,
+        blocks: bool,
+        alive: bool,
+    ) -> Self {
         Object { x, y, char, color }
     }
 
@@ -93,6 +104,17 @@ impl Object {
     pub fn set_pos(&mut self, x: i32, y: i32) {
         self.x = x;
         self.y = y;
+    }
+
+    fn is_blocked(x: i32, y: i32, map: &Map, objects: &[Object]) -> bool {
+        // first test the map tile
+        if map[x as usize][y as usize].blocked {
+            return true;
+        }
+        // now check for any blocking objects
+        objects
+            .iter()
+            .any(|object| object.blocks && object.pos() == (x, y))
     }
 }
 
