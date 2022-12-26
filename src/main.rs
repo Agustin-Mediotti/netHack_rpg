@@ -15,6 +15,7 @@ use tcod::map::{FovAlgorithm, Map as FovMap};
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 const LIMIT_FPS: i32 = 20;
+const PLAYER: usize = 0;
 
 const MAP_WIDTH: i32 = 80;
 const MAP_HEIGHT: i32 = 45;
@@ -83,8 +84,16 @@ impl Object {
     pub fn draw(&self, con: &mut dyn Console) {
         con.set_default_foreground(self.color);
         con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
+    } //  The 'dyn' keyword highlights that Console is a trait and not a concrete type such as struct or enum
+
+    pub fn pos(&self) -> (i32, i32) {
+        (self.x, self.y)
     }
-    //  The 'dyn' keyword highlights that Console is a trait and not a concrete type such as struct or enum
+
+    pub fn set_pos(&mut self, x: i32, y: i32) {
+        self.x = x;
+        self.y = y;
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -151,7 +160,7 @@ fn make_map(objects: &mut Vec<Object>) -> Map {
 
             if rooms.is_empty() {
                 // This is the first room, where the player starts at
-                objects.[PLAYER].set_pos(new_x, new_y);
+                objects[PLAYER].set_pos(new_x, new_y);
             } else {
                 /* All rooms after the first, connect it to the previous room with a tunnel */
 
@@ -268,7 +277,7 @@ fn handle_keys(tcod: &mut Tcod, game: &Game, player: &mut Object) -> bool {
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
     if fov_recompute {
         // recompute FOV if needed (the player moved or something)
-        let player = &objects[0];
+        let player = &objects[PLAYER];
         tcod.fov
             .compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
     }
@@ -356,7 +365,7 @@ fn main() {
 
     let player = Object::new(0, 0, '@', WHITE);
 
-    let mut objects = vec! [player];
+    let mut objects = vec![player];
 
     let mut game = Game {
         map: make_map(&mut objects),
@@ -384,7 +393,7 @@ fn main() {
         tcod.con.clear();
 
         // render the screen
-        let fov_recompute = previous_player_position != (objects[0].x, objects[0].y);
+        let fov_recompute = previous_player_position != (objects[PLAYER].pos());
         render_all(&mut tcod, &mut game, &objects, fov_recompute);
 
         tcod.root.flush();
